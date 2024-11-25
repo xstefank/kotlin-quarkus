@@ -1,5 +1,4 @@
-import io.quarkus.gradle.tasks.QuarkusBuild
-import org.gradle.internal.classpath.Instrumented.systemProperty
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     kotlin("jvm") version "2.0.21"
@@ -17,6 +16,7 @@ val quarkusPlatformArtifactId: String by project
 val quarkusPlatformVersion: String by project
 
 dependencies {
+    implementation("io.quarkus:quarkus-container-image-docker")
     implementation(enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}"))
     implementation("io.quarkus:quarkus-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
@@ -45,10 +45,14 @@ allOpen {
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions.jvmTarget = JavaVersion.VERSION_21.toString()
-    kotlinOptions.javaParameters = true
+    compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
+    compilerOptions.javaParameters = true
 }
 
-tasks.withType<QuarkusBuild> {
-    systemProperty("quarkus.package.jar.enabled", "false")
+tasks.testNative {
+    outputs.upToDateWhen { false }
+}
+
+tasks.quarkusIntTest {
+    outputs.upToDateWhen { false }
 }
